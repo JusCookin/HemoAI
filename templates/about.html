@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HemoGuard: About Anemia</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
+</head>
+<body class = "about-page">
+    <header>
+        <div class="logo">HemoGuard</div>
+        <nav>
+            <a href="{{ url_for('home') }}">Home</a>
+    	    <a href="{{ url_for('about') }}">About</a>
+    	    <a href="{{ url_for('predict') }}">Predict</a>
+    	    <a href="{{ url_for('team') }}">Team</a>
+
+        </nav>
+    </header>
+    <main>
+        <div class="about-section">
+            <h2>About Anemia</h2>
+            <p>Anemia is a condition in which you lack enough healthy red blood cells to carry adequate oxygen to your body's tissues. Having anemia can make you feel tired and weak. There are many forms of anemia, each with its own cause. Anemia can be temporary or long term, and it can range from mild to severe.</p>
+            <h3>Symptoms of Anemia</h3>
+            <ul>
+                <li>Fatigue</li>
+                <li>Weakness</li>
+                <li>Pale or yellowish skin</li>
+                <li>Irregular heartbeats</li>
+                <li>Shortness of breath</li>
+                <li>Dizziness or lightheadedness</li>
+                <li>Chest pain</li>
+                <li>Cold hands and feet</li>
+                <li>Headaches</li>
+            </ul>
+        </div>
+	<div class="indicators-section">
+            <h2>Key Indicators for Anemia Detection</h2>
+            <div>
+                <h3>Hemoglobin</h3>
+                <p>Hemoglobin is the protein in your blood that carries oxygen. Low levels of hemoglobin are indicative of anemia.</p>
+            </div>
+            <div>
+                <h3>MCH</h3>
+                <p>Mean Corpuscular Hemoglobin (MCH) measures the average amount of hemoglobin in a single red blood cell. Low MCH levels can be a sign of anemia.</p>
+            </div>
+            <div>
+                <h3>MCHC</h3>
+                <p>Mean Corpuscular Hemoglobin Concentration (MCHC) indicates the average concentration of hemoglobin in a given volume of red blood cells. It is used to help diagnose the type of anemia.</p>
+            </div>
+            <div>
+                <h3>MCV</h3>
+                <p>Mean Corpuscular Volume (MCV) measures the average size of your red blood cells. Abnormal MCV levels can indicate different types of anemia.</p>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

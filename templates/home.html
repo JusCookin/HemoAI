@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HemoGuard: Anemia Predictor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
+     <style>
+        body {
+            background-image: url('https://img.freepik.com/free-photo/close-up-red-water-drops-table_188544-16318.jpg?size=626&ext=jpg&ga=GA1.1.763579860.1720423781&semt=ais_user');
+            background-size: cover;
+            background-repeat: no-repeat;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">HemoGuard</div>
+        <nav>
+            <a href="{{ url_for('home') }}">Home</a>
+    	    <a href="{{ url_for('about') }}">About</a>
+    	    <a href="{{ url_for('predict') }}">Predict</a>
+    	    <a href="{{ url_for('team') }}">Team</a>
+
+        </nav>
+    </header>
+    <main class="hero">
+        <div class="hero-content">
+            <h1>HemoGuard: Your Blood Health Sentinel</h1>
+            <p>Empowering you with early detection for better management and healthier living. Our advanced AI-powered tool analyzes your blood health indicators to predict anemia risks before symptoms appear. Stay proactive, informed, and in control of your well-being with HemoGuard's personalized insights and recommendations.</p>
+        </div>
+        <a href="{{ url_for('predict') }}" class="check-button">Click to Test</a>
+    </main>
+</body>
+</html>

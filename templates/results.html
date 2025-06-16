@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HemoGuard: Anemia Predictor - Results</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        /* Enhanced Results Page Specific Styles */
+        .results-main {
+            padding-top: 8rem;
+            min-height: 100vh;
+        }
+
+        .results-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .results-header h2 {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, #FF0040, #FF204E, #A0153E);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            animation: slideInFromTop 1s ease-out, neonPulse 3s ease-in-out infinite alternate;
+        }
+
+        .results-subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        .result-container {
+            max-width: 800px;
+            margin: 0 auto 3rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            animation: resultAppear 0.8s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #FF0040, #FF204E, #A0153E, #FF0040);
+            background-size: 400% 400%;
+            border-radius: 20px;
+            z-index: -1;
+            animation: gradientRotate 4s ease infinite;
+            opacity: 0.5;
+        }
+
+        @keyframes gradientRotate {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .result-container h3 {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #FF0040;
+            margin-bottom: 2rem;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+        }
+
+        .result-container h3::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #FF0040, transparent);
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .result-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 0, 64, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .result-item:hover::before {
+            left: 100%;
+        }
+
+        .result-item:hover {
+            transform: translateY(-5px) scale(1.02);
+            border-color: #FF0040;
+            box-shadow: 0 10px 30px rgba(255, 0, 64, 0.3);
+        }
+
+        .result-item p {
+            margin: 0;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: #FF204E !important;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .result-value {
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: #FFFFFF !important;
+        }
+
+        .prediction {
+            background: linear-gradient(135deg, #FF0040, #FF204E);
+            color: #FFFFFF;
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            font-family: 'Orbitron', monospace;
+            font-size: 1.5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 2rem;
+            position: relative;
+            overflow: hidden;
+            animation: predictionGlow 2s ease-in-out infinite alternate;
+            box-shadow: 0 10px 30px rgba(255, 0, 64, 0.4);
+        }
+
+        .prediction::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: rotate 3s linear infinite;
+        }
+
+        @keyframes predictionGlow {
+            0% { 
+                box-shadow: 0 10px 30px rgba(255, 0, 64, 0.4);
+                transform: scale(1);
+            }
+            100% { 
+                box-shadow: 0 15px 40px rgba(255, 0, 64, 0.6), inset 0 0 20px rgba(255, 255, 255, 0.1);
+                transform: scale(1.02);
+            }
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 3rem;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, #FF0040, #FF204E);
+            color: #FFFFFF;
+            border: none;
+            padding: 1.2rem 2.5rem;
+            border-radius: 50px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 30px rgba(255, 0, 64, 0.3);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+            transition: all 0.3s ease;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+        }
+
+        .action-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(255, 0, 64, 0.5);
+        }
+
+        .pdf-btn {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+        }
+
+        .pdf-btn:hover {
+            box-shadow: 0 15px 40px rgba(76, 175, 80, 0.5);
+        }
+
+        .new-prediction-btn {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+        }
+
+        .new-prediction-btn:hover {
+            box-shadow: 0 15px 40px rgba(33, 150, 243, 0.5);
+        }
+
+        /* PDF Specific Styles */
+        .pdf-content {
+            background: #FFFFFF;
+            color: #000000;
+            padding: 2rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            display: none;
+        }
+
+        .pdf-content.generating {
+            display: block;
+        }
+
+        .pdf-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #FF0040;
+            padding-bottom: 1rem;
+        }
+
+        .pdf-header h1 {
+            color: #FF0040;
+            font-family: 'Orbitron', monospace;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .pdf-header p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .pdf-results {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .pdf-result-item {
+            background: #f5f5f5;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #FF0040;
+        }
+
+        .pdf-result-item strong {
+            color: #FF0040;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .pdf-prediction {
+            background: linear-gradient(135deg, #FF0040, #FF204E);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid #FF0040;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .result-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .result-container {
+                padding: 2rem;
+                margin: 0 1rem 2rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .action-btn {
+                padding: 1rem 2rem;
+                font-size: 1rem;
+            }
+            
+            .pdf-results {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .results-main {
+                padding-top: 6rem;
+            }
+            
+            .result-container {
+                padding: 1.5rem;
+            }
+            
+            .prediction {
+                font-size: 1.2rem;
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="logo">HemoGuard</div>
+        <nav>
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('about') }}">About</a>
+            <a href="{{ url_for('predict') }}">Predict</a>
+            <a href="{{ url_for('team') }}">Team</a>
+        </nav>
+    </header>
+
+    <main class="results-main">
+        <div class="results-header">
+            <h2>Prediction Results</h2>
+            <p class="results-subtitle">Advanced ML Analysis Complete</p>
+        </div>
+
+        <div class="result-container" id="resultContainer">
+            <h3>Patient Analysis Report</h3>
+            
+            <div class="result-grid">
+                <div class="result-item">
+                    <span class="result-label">Patient Name</span>
+                    <p class="result-value">{{f}}</p>
+                </div>
+                
+                <div class="result-item">
+                    <span class="result-label">Gender</span>
+                    <p class="result-value">{{e}}</p>
+                </div>
+                
+                <div class="result-item">
+                    <span class="result-label">Hemoglobin Level</span>
+                    <p class="result-value">{{a}} g/dL</p>
+                </div>
+                
+                <div class="result-item">
+                    <span class="result-label">Mean Corpuscular Hemoglobin</span>
+                    <p class="result-value">{{b}} pg</p>
+                </div>
+                
+                <div class="result-item">
+                    <span class="result-label">MCH Concentration</span>
+                    <p class="result-value">{{c}} g/dL</p>
+                </div>
+                
+                <div class="result-item">
+                    <span class="result-label">Mean Corpuscular Volume</span>
+                    <p class="result-value">{{d}} fL</p>
+                </div>
+            </div>
+            
+            <div class="prediction">
+                <div style="position: relative; z-index: 2;">
+                    🩺 {{predicted_res}}
+                </div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="action-btn pdf-btn" onclick="generatePDF()">
+                📄 Download PDF Report
+            </button>
+            <a href="{{ url_for('predict') }}" class="action-btn new-prediction-btn">
+                🔄 New Prediction
+            </a>
+            <a href="{{ url_for('home') }}" class="action-btn">
+                🏠 Back to Home
+            </a>
+        </div>
+
+        <div class="loading" id="loadingIndicator">
+            <div class="spinner"></div>
+            <p>Generating PDF Report...</p>
+        </div>
+
+        <!-- Hidden PDF Content -->
+        <div class="pdf-content" id="pdfContent">
+            <div class="pdf-header">
+                <h1>🩺 HemoGuard</h1>
+                <p>Anemia Prediction Report</p>
+                <p>Generated on: <span id="reportDate"></span></p>
+            </div>
+            
+            <div class="pdf-results">
+                <div class="pdf-result-item">
+                    <strong>Patient Name:</strong>
+                    <span>{{f}}</span>
+                </div>
+                <div class="pdf-result-item">
+                    <strong>Gender:</strong>
+                    <span>{{e}}</span>
+                </div>
+                <div class="pdf-result-item">
+                    <strong>Hemoglobin Level:</strong>
+                    <span>{{a}} g/dL</span>
+                </div>
+                <div class="pdf-result-item">
+                    <strong>Mean Corpuscular Hemoglobin:</strong>
+                    <span>{{b}} pg</span>
+                </div>
+                <div class="pdf-result-item">
+                    <strong>MCH Concentration:</strong>
+                    <span>{{c}} g/dL</span>
+                </div>
+                <div class="pdf-result-item">
+                    <strong>Mean Corpuscular Volume:</strong>
+                    <span>{{d}} fL</span>
+                </div>
+            </div>
+            
+            <div class="pdf-prediction">
+                <strong>AI Prediction Result:</strong><br>
+                {{predicted_res}}
+            </div>
+            
+            <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #ddd; text-align: center; color: #666; font-size: 0.9rem;">
+                <p><strong>Disclaimer:</strong> This prediction is generated by an AI model and should not replace professional medical diagnosis. Please consult with a healthcare professional for proper medical advice.</p>
+                <p style="margin-top: 1rem;">Report generated by HemoGuard AI System | © 2025 HemoGuard Technologies</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Set current date for PDF
+        document.getElementById('reportDate').textContent = new Date().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        async function generatePDF() {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const pdfContent = document.getElementById('pdfContent');
+            
+            try {
+                // Show loading indicator
+                loadingIndicator.classList.add('show');
+                
+                // Show PDF content temporarily for capture
+                pdfContent.classList.add('generating');
+                
+                // Wait a bit for content to render
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                // Generate PDF using html2canvas and jsPDF
+                const canvas = await html2canvas(pdfContent, {
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#ffffff'
+                });
+                
+                const imgData = canvas.toDataURL('image/png');
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                
+                const imgWidth = 210;
+                const pageHeight = 295;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 0;
+                
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+                
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+                
+                // Generate filename with patient name and date
+                const patientName = '{{f}}' || 'Patient';
+                const date = new Date().toISOString().split('T')[0];
+                const filename = `HemoGuard_Report_${patientName}_${date}.pdf`;
+                
+                pdf.save(filename);
+                
+                // Show success message
+                showNotification('PDF report generated successfully!', 'success');
+                
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                showNotification('Error generating PDF. Please try again.', 'error');
+            } finally {
+                // Hide loading indicator and PDF content
+                loadingIndicator.classList.remove('show');
+                pdfContent.classList.remove('generating');
+            }
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 1rem 2rem;
+                border-radius: 10px;
+                color: white;
+                font-weight: 600;
+                z-index: 10000;
+                animation: slideInRight 0.3s ease-out;
+                background: ${type === 'success' ? 'linear-gradient(135deg, #4CAF50, #45a049)' : 'linear-gradient(135deg, #f44336, #d32f2f)'};
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.3s ease-in forwards';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Add CSS for notification animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOutRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Add some entrance animations for result items
+        document.addEventListener('DOMContentLoaded', function() {
+            const resultItems = document.querySelectorAll('.result-item');
+            resultItems.forEach((item, index) => {
+                item.style.opacity = '0';
+                item.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    item.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+                    item.style.opacity = '1';
+                    item.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>

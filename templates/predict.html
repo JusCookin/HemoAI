@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HemoGuard: Anemia Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
+</head>
+<body>
+    <header>
+        <div class="logo">HemoGuard</div>
+        <nav>
+            <a href="{{ url_for('home') }}">Home</a>
+    	    <a href="{{ url_for('about') }}">About</a>
+    	    <a href="{{ url_for('predict') }}">Predict</a>
+    	    <a href="{{ url_for('team') }}">Team</a>
+	</nav>
+    </header>
+
+    <main>
+        <h1>Enter your details for the Test</h1>
+        <form action = "/results" method = "post">
+            <label for="name">Enter your name:</label>
+            <input type="text" name="name" id="name"><br><br>
+            
+            <label>Gender:</label>
+            <select name="gender" id="gender">
+                 <option value="choose">Select your Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+            </select><br><br>
+            
+            <label for="hb">Enter your Hemoglobin: (Range: 6 - 17)</label>
+            <input type="number" name="hb" id="hb" max="17" min="6" step="0.1"><br><br>
+            
+            <label for="mch">Mean-Corpuscular-Hemoglobin (Range: 16 - 30)</label>
+            <input type="number" name="mch" id="mch" min="16" max="30" step="0.1"><br><br>
+            
+            <label for="mchc">Mean-Corpuscular-Hemoglobin Concentration (Range: 28 - 34)</label>
+            <input type="number" name="mchc" id="mchc" min="28" max="34" step="0.1"><br><br>
+            
+            <label for="mcv">Mean-Corpuscular-Volume (Range: 70 - 100)</label>
+            <input type="number" name="mcv" id="mcv" min="70" max="100" step="0.1"><br><br>
+            
+            <button type = "submit">Go to Results</button>
+        </form>
+    </main>
+</body>
+</html>
